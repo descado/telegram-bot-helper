@@ -21,9 +21,8 @@ const httpRequestDurationMicroseconds = new client.Histogram({
   name: 'http_request_duration_seconds',
   help: 'Duration of HTTP requests in seconds',
   labelNames: ['method', 'route', 'status_code'],
-  // Бакеты в секундах. Подбираем их так, чтобы покрыть ожидаемое время ответа
-  // и иметь хороший интервал около нашего порога в 500ms (0.5s)
-  buckets: [0.1, 0.3, 0.5, 0.7, 1, 3, 5, 10], 
+  // Бакеты в секундах.
+  buckets: [0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10],
   registers: [register],
 });
 
