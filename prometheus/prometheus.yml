@@ -1,0 +1,20 @@
+global:
+  scrape_interval: 15s # Как часто опрашивать цели (раз в 15 секунд)
+  evaluation_interval: 15s # Как часто проверять правила алертов
+
+scrape_configs:
+  # Первая задача (job) - собирать метрики с самого Prometheus
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # ВТОРАЯ И САМАЯ ВАЖНАЯ ЗАДАЧА: собирать метрики с нашего приложения
+  - job_name: 'telegram-analytics-app'
+    # Docker Compose автоматически сделает так, что имя сервиса 'app'
+    # будет доступно как хост внутри Docker-сети.
+    static_configs:
+      - targets: ['app:8080'] # Указываем на наш сервис и его порт
+
+  - job_name: 'mongodb'
+    static_configs:
+      - targets: ['mongodb-exporter:9216']
