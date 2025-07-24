@@ -72,6 +72,17 @@ services:
     networks:
       - o11y-net
 
+  locust:
+    build:
+      context: ./locust # Указываем на папку с Dockerfile для Locust
+    ports:
+      - "8089:8089" # Стандартный порт для UI Locust
+    command: -f /home/locust/locustfile.py --host http://app:8080
+    networks:
+      - o11y-net
+    depends_on:
+      - app
+
 volumes:
   mongo-data:
   grafana-data:
