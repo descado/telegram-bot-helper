@@ -59,9 +59,23 @@ services:
     networks:
       - o11y-net
 
+  alertmanager:
+    image: prom/alertmanager:v0.25.0
+    ports:
+      - "9093:9093" # Веб-интерфейс Alertmanager
+    volumes:
+      - ./alertmanager/alertmanager.yml:/config/alertmanager.yml
+      - alertmanager-data:/data
+    command:
+      - '--config.file=/config/alertmanager.yml'
+      - '--storage.path=/data'
+    networks:
+      - o11y-net
+
 volumes:
   mongo-data:
   grafana-data:
+  alertmanager-data:
 
 networks:
   o11y-net:
