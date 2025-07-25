@@ -10,6 +10,7 @@ services:
       - PORT=8080
     depends_on:
       - mongo
+      - jaeger
     networks:
       - o11y-net
 
@@ -82,6 +83,14 @@ services:
       - o11y-net
     depends_on:
       - app
+  
+  jaeger:
+    image: jaegertracing/all-in-one:1.41 # all-in-one образ для простоты
+    ports:
+      - "16686:16686" # UI
+      - "4318:4318"   # OTLP HTTP receiver
+    networks:
+      - o11y-net
 
 volumes:
   mongo-data:
