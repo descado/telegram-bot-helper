@@ -9,8 +9,10 @@ services:
       - MONGO_URI=mongodb://mongo:27017/telegram-analytics
       - PORT=8080
     depends_on:
-      - mongo
-      - jaeger
+      mongo:
+        condition: service_started
+      jaeger:
+        condition: service_healthy 
     networks:
       - o11y-net
 
@@ -85,12 +87,18 @@ services:
       - app
   
   jaeger:
-    image: jaegertracing/all-in-one:1.41 # all-in-one образ для простоты
+    build:
+      context: ./jaeger
     ports:
       - "16686:16686" # UI
       - "4318:4318"   # OTLP HTTP receiver
     networks:
       - o11y-net
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://localhost:16686"]
+      interval: 5s
+      timeout: 2s
+      retries: 10
 
 volumes:
   mongo-data:
