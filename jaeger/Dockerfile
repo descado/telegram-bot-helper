@@ -1,11 +1,8 @@
 # jaeger/Dockerfile
 FROM jaegertracing/all-in-one:1.41
 
-# Jaeger работает под пользователем 'jaeger', переключаемся на root для установки
+# Переключаемся на root для установки пакетов
 USER root
 
-# Обновляем списки пакетов и устанавливаем wget с помощью apk
+# Обновляем списки пакетов и устанавливаем wget
 RUN apk update && apk add --no-cache wget
-
-# Возвращаемся к пользователю 'jaeger'
-USER jaeger
