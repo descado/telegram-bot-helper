@@ -4,6 +4,9 @@ alerting:
     - targets:
       - 'alertmanager:9093' # Указываем на Alertmanager по имени сервиса
       
+rule_files:
+  - "/etc/prometheus/alerts.rules.yml"
+  
 global:
   scrape_interval: 15s # Как часто опрашивать цели (раз в 15 секунд)
   evaluation_interval: 15s # Как часто проверять правила алертов
