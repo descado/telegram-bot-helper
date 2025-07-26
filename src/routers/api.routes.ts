@@ -45,12 +45,9 @@ router.get('/search', async (req: Request, res: Response) => {
   }
 
   try {
-    // !!! ИСКУССТВЕННАЯ ПРОБЛЕМА !!!
-    // Поиск по текстовому полю с помощью регулярного выражения без индекса.
-    // На большой коллекции это будет работать ОЧЕНЬ медленно.
-    const results = await MessageModel.find({ 
+      const results = await MessageModel.find({ 
       text: { $regex: textQuery, $options: 'i' } 
-    }).limit(50); // Ищем по подстроке без учета регистра
+    }).limit(50); 
 
     res.status(200).json(results);
   } catch (error) {
