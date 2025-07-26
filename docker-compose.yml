@@ -45,7 +45,7 @@ services:
       - "3000:3000"
     volumes:
       - grafana-data:/var/lib/grafana
-      - ./grafana/provisioning/:/etc/grafana/provisioning/
+      #- ./grafana/provisioning/:/etc/grafana/provisioning/
     networks:
       - o11y-net
     depends_on:
