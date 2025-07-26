@@ -1,4 +1,3 @@
-// src/services/metrics.ts
 import { Request, Response, NextFunction } from 'express';
 import client from 'prom-client';
 
@@ -12,7 +11,8 @@ client.collectDefaultMetrics({ register });
 const httpRequestCounter = new client.Counter({
   name: 'http_requests_total',
   help: 'Total number of HTTP requests',
-  labelNames: ['method', 'route', 'status_code'],
+  // ИСПРАВЛЕНИЕ: Добавляем метку 'code' для HTTP-статуса
+  labelNames: ['method', 'route', 'code'],
   registers: [register],
 });
 
@@ -20,24 +20,31 @@ const httpRequestCounter = new client.Counter({
 const httpRequestDurationMicroseconds = new client.Histogram({
   name: 'http_request_duration_seconds',
   help: 'Duration of HTTP requests in seconds',
-  labelNames: ['method', 'route', 'status_code'],
-  // Бакеты в секундах.
+  // ИСПРАВЛЕНИЕ: Приводим метки к единому виду с 'code'
+  labelNames: ['method', 'route', 'code'],
+  // Используем "мелкие" ведра для более точного измерения быстрых запросов
   buckets: [0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10],
   registers: [register],
 });
 
 // 5. Создаем middleware, который будет собирать метрики для каждого запроса
 export const metricsMiddleware = (req: Request, res: Response, next: NextFunction) => {
-  const end = httpRequestDurationMicroseconds.startTimer();
-  
-  res.on('finish', () => {
-    const route = req.route ? req.route.path : 'unknown_route';
-    const statusCode = res.statusCode;
+  // Пропускаем запросы к самим метрикам, чтобы не загрязнять статистику
+  if (req.path === '/metrics') {
+    return next();
+  }
 
-    // Заполняем метрики данными из запроса/ответа
-    httpRequestCounter.labels(req.method, route, statusCode.toString()).inc();
-    end({ method: req.method, route, status_code: statusCode });
+  const end = httpRequestDurationMicroseconds.startTimer();
+
+  res.on('finish', () => {
+    // Пытаемся получить "чистый" путь, например /api/stats/:botId, а не /api/stats/test-bot
+    const route = req.route ? req.route.path : req.path.toLowerCase();
+    const statusCode = res.statusCode.toString();
+
+    // Заполняем метрики данными из запроса/ответа, используя 'code'
+    httpRequestCounter.labels(req.method, route, statusCode).inc();
+    end({ method: req.method, route, code: statusCode });
   });
-  
+
   next();
 };
