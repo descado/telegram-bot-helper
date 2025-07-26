@@ -1,12 +1,6 @@
-# Этот файл говорит Grafana, что нужно сканировать эту папку на наличие .json файлов
 apiVersion: 1
-
 providers:
   - name: 'default-dashboards'
-    orgId: 1
-    folder: '' # В какую папку в UI Grafana положить дашборд (пусто = в корень)
     type: file
-    disableDeletion: false # Разрешить удалять дашборды из UI
-    editable: true
     options:
-      path: /etc/grafana/provisioning/dashboards # Путь ВНУТРИ контейнера
+      path: /etc/grafana/provisioning/dashboards
