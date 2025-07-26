@@ -1,8 +1,10 @@
+# Этот файл описывает подключение к Prometheus
 apiVersion: 1
+
 datasources:
-  - name: Prometheus
+  - name: Prometheus       # Имя, которое вы увидите в UI
     type: prometheus
     access: proxy
-    url: http://prometheus:9090
-    isDefault: true
-    uid: prometheus-ds
+    url: http://prometheus:9090 # Адрес внутри Docker-сети
+    isDefault: true         # Сделать его источником по умолчанию
+    uid: prometheus-ds      # Уникальный ID, на который мы будем ссылаться

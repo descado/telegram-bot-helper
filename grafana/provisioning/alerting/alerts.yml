@@ -1,19 +1,28 @@
 apiVersion: 1
+
 groups:
-  - name: Service Alerts Group
-    folder: Service Alerts
-    interval: 1m
+  - name: Service Alerts Group # Название группы алертов
+    folder: Service Alerts      # Название папки, в которой они будут в UI
+    interval: 1m                # Как часто проверять правила в этой группе
     rules:
-      - uid: p99_latency_alert_rule
+      # --- ПРАВИЛО №1: ВРЕМЯ ОТВЕТА P99 ---
+      - uid: p99_latency_alert_rule # Уникальный ID для этого правила
         title: Время ответа p99 больше 500ms
-        condition: C
+        condition: C # Условие C будет нашим Classic Condition
         data:
+          # Запрос A
           - refId: A
-            datasourceUid: prometheus-ds
+            datasourceUid: prometheus-ds # Ссылка на наш источник данных по его UID
             model:
               expr: 'histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{job="telegram-analytics-app", route!~"/metrics|/health|unknown_route"}[5m])) by (le, route))'
+              intervalMs: 15000
+              maxDataPoints: 43200
+              relativeTimeRange: # <-- ИСПРАВЛЕНИЕ
+                from: 600
+                to: 0
+          # Выражение C - Classic Condition
           - refId: C
-            datasourceUid: __expr__
+            datasourceUid: __expr__ # __expr__ означает "выражение Grafana"
             model:
               type: classic_conditions
               conditions:
@@ -24,16 +33,24 @@ groups:
         for: 0m
         annotations:
           summary: 'Высокая задержка на ручке {{ $labels.route }}'
-          description: 'P99 latency для {{ $labels.route }} составило {{ $values.A }}с.'
+          description: 'P99 latency для {{ $labels.route }} составило {{ $values.A }}с, что превышает порог в 0.5с.'
 
+      # --- ПРАВИЛО №2: RPS В БД ---
       - uid: db_rps_alert_rule
         title: Высокий RPS в базе данных
         condition: C
         data:
+          # Запрос A
           - refId: A
             datasourceUid: prometheus-ds
             model:
               expr: 'sum(rate(mongodb_ss_opcounters[1m]))'
+              intervalMs: 15000
+              maxDataPoints: 43200
+              relativeTimeRange: # <-- ИСПРАВЛЕНИЕ
+                from: 600
+                to: 0
+          # Выражение C - Classic Condition
           - refId: C
             datasourceUid: __expr__
             model:
