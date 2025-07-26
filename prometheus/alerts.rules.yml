@@ -1,0 +1,22 @@
+groups:
+  - name: ServiceAlerts
+    rules:
+      # --- ПРАВИЛО №1: ВРЕМЯ ОТВЕТА P99 > 500ms ---
+      - alert: HighP99Latency
+        expr: histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{job="telegram-analytics-app", route!~"/metrics|/health|unknown_route"}[5m])) by (le, route)) > 0.5
+        for: 0s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Высокая задержка на ручке {{ $labels.route }}"
+          description: "P99 latency для ручки {{ $labels.route }} составляет {{ $value | printf `%.2fs` }}, что превышает порог в 0.5с."
+
+      # --- ПРАВИЛО №2: RPS В БД > 100 ---
+      - alert: HighDatabaseRPS
+        expr: sum(rate(mongodb_ss_opcounters[1m])) > 100
+        for: 0s
+        labels:
+          severity: warning
+        annotations:
+          summary: "Критически высокая нагрузка на базу данных!"
+          description: "Суммарный RPS в базе данных достиг {{ $value | printf `%.0f` }}, превысив порог в 100."
