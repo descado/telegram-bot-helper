@@ -5,6 +5,7 @@ import { connectDB } from './services/database';
 import apiRoutes from './routers/api.routes';
 import swaggerUi from 'swagger-ui-express';
 import swaggerJsdoc from 'swagger-jsdoc';
+import path from 'path';
 // --- ИМПОРТИРУЕМ ВСЕ ДЛЯ МЕТРИК ---
 import { register, metricsMiddleware } from './services/metrics';
 
@@ -24,7 +25,7 @@ const swaggerOptions = {
     servers: [{ url: `http://51.250.78.138:8080` }], 
   },
   // Путь к файлам с JSDoc комментариями
-  apis: ['./src/routers/*.ts'],
+  apis: [path.join(__dirname, 'routers', '*.js')],
 };
 
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
