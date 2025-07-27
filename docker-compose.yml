@@ -8,6 +8,8 @@ services:
     environment:
       - MONGO_URI=mongodb://mongo:27017/telegram-analytics
       - PORT=8080
+      # Добавляем переменные для трассировки (если нужно)
+      - OTEL_SERVICE_NAME=telegram-analytics-service
     depends_on:
       mongo:
         condition: service_started
@@ -67,7 +69,7 @@ services:
   alertmanager:
     image: prom/alertmanager:v0.25.0
     ports:
-      - "9093:9093" # Веб-интерфейс Alertmanager
+      - "9093:9093"
     volumes:
       - ./alertmanager/alertmanager.yml:/config/alertmanager.yml
       - alertmanager-data:/data
@@ -79,14 +81,22 @@ services:
 
   locust:
     build:
-      context: ./locust # Указываем на папку с Dockerfile для Locust
+      context: ./locust
     ports:
-      - "8089:8089" # Стандартный порт для UI Locust
+      - "8089:8089"
     command: -f /home/locust/locustfile.py --host http://app:8080
+    environment:
+      # Настройки для OpenTelemetry
+      - OTEL_SERVICE_NAME=locust-load-test
+      - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://jaeger:4318/v1/traces
+      - OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+      # Дополнительные настройки трассировки
+      - OTEL_RESOURCE_ATTRIBUTES=service.name=locust-load-test,service.version=1.0.0
     networks:
       - o11y-net
     depends_on:
       - app
+      - jaeger
   
   jaeger:
     build:
@@ -98,7 +108,10 @@ services:
     networks:
       - o11y-net
     environment:
-    - COLLECTOR_OTLP_ENABLED=true
+      - COLLECTOR_OTLP_ENABLED=true
+      # Дополнительные настройки для лучшей производительности
+      - SPAN_STORAGE_TYPE=memory
+      - MEMORY_MAX_TRACES=50000
     healthcheck:
       test: ["CMD", "wget", "-q", "-O", "-", "http://localhost:16686"]
       interval: 5s
