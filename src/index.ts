@@ -46,11 +46,7 @@ app.get('/health', (req, res) => {
 
 app.get('/docs', (req, res) => {
   try {
-    // Выводим текущую рабочую директорию и предполагаемый путь к README.md для отладки
-    console.log('Текущая рабочая директория (process.cwd()):', process.cwd());
-    const readmePath = path.join(process.cwd(), 'README.md');
-    console.log('Предполагаемый путь к README.md:', readmePath);
-
+    const readmePath = path.join(__dirname, '..', 'README.md'); // Путь к README.md относительно src/
     const readmeContent = fs.readFileSync(readmePath, 'utf8');
     res.setHeader('Content-Type', 'text/plain; charset=utf-8'); // Отдаем как простой текст
     res.send(readmeContent);
@@ -58,7 +54,7 @@ app.get('/docs', (req, res) => {
     console.error('Ошибка при чтении README.md:', error);
     // Отправляем более информативное сообщение об ошибке, если файл не найден.
     if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
-      res.status(404).send('Файл README.md не найден по указанному пути. Пожалуйста, проверьте консоль сервера для деталей.');
+      res.status(404).send('Файл README.md не найден в корне проекта.');
     } else {
       res.status(500).send('Не удалось загрузить документацию.');
     }
