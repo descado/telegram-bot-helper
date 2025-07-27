@@ -29,7 +29,7 @@ const swaggerOptions = {
 };
 
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
-app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // --- ИСПОЛЬЗУЕМ MIDDLEWARE ДЛЯ ВСЕХ ЗАПРОСОВ ---
 // Важно: он должен быть до объявления роутов

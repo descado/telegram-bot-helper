@@ -1,5 +1,7 @@
 import { Router, Request, Response } from 'express';
 import MessageModel from '../models/message.model';
+import fs from 'fs';
+import path from 'path';
 
 /**
  * @swagger
@@ -112,5 +114,37 @@ router.get('/search', async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Ошибка сервера при поиске' });
   }
 });
+
+// --- ДОБАВЛЯЕМ РУЧКУ /docs В API ROUTER ---
+/**
+ * @swagger
+ * /api/docs:
+ * get:
+ * summary: Получить README.md
+ * tags: [API]
+ * responses:
+ * 200:
+ * description: Содержимое README.md
+ * content:
+ * text/plain:
+ * schema:
+ * type: string
+ * 500:
+ * description: Ошибка сервера
+ */
+router.get('/docs', (req: Request, res: Response) => {
+  try {
+    // __dirname в api.routes.ts будет src/routers.
+    // README.md находится в корне, поэтому нужно подняться на две директории.
+    const readmePath = path.join(__dirname, '..', '..', 'README.md');
+    const readmeContent = fs.readFileSync(readmePath, 'utf8');
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    res.send(readmeContent);
+  } catch (error) {
+    console.error('Ошибка при чтении README.md:', error);
+    res.status(500).send('Не удалось загрузить документацию.');
+  }
+});
+
 
 export default router;
