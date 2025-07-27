@@ -1,10 +1,32 @@
 import { Router, Request, Response } from 'express';
 import MessageModel from '../models/message.model';
 
+/**
+ * @swagger
+ * tags:
+ *   name: API
+ *   description: Основные ручки сервиса
+ */
+
 const router = Router();
 
 // --- Эндпоинт №1: Логирование сообщения (высокая нагрузка на запись) ---
 // POST /api/log
+/**
+ * @swagger
+ * /api/log:
+ *   post:
+ *     summary: Логирование нового сообщения
+ *     tags: [API]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema: { type: object, properties: { botId: { type: string }, chatId: { type: number }, userId: { type: number }, text: { type: string } } }
+ *     responses:
+ *       201:
+ *         description: Сообщение успешно сохранено.
+ */
 router.post('/log', async (req: Request, res: Response) => {
   const { botId, chatId, userId, text } = req.body;
 
@@ -24,6 +46,23 @@ router.post('/log', async (req: Request, res: Response) => {
 
 // --- Эндпоинт №2: Получение статистики (простое чтение) ---
 // GET /api/stats/:botId
+/**
+ * @swagger
+ * /api/stats/{botId}:
+ *   get:
+ *     summary: Получение статистики по боту
+ *     tags: [API]
+ *     parameters:
+ *       - in: path
+ *         name: botId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID бота
+ *     responses:
+ *       200:
+ *         description: Успешный ответ со статистикой.
+ */
 router.get('/stats/:botId', async (req: Request, res: Response) => {
   try {
     const { botId } = req.params;
@@ -37,6 +76,24 @@ router.get('/stats/:botId', async (req: Request, res: Response) => {
 
 // --- Эндпоинт №3: "Проблемный" поиск (для генерации алерта по latency) ---
 // GET /api/search
+
+/**
+ * @swagger
+ * /api/search:
+ *   get:
+ *     summary: Поиск сообщений по тексту
+ *     tags: [API]
+ *     parameters:
+ *       - in: query
+ *         name: textQuery
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Текст для поиска
+ *     responses:
+ *       200:
+ *         description: Успешный ответ с массивом найденных сообщений.
+ */
 router.get('/search', async (req: Request, res: Response) => {
   const { textQuery } = req.query;
 

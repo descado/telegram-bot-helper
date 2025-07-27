@@ -3,6 +3,8 @@ import express from 'express';
 import 'dotenv/config';
 import { connectDB } from './services/database';
 import apiRoutes from './routers/api.routes';
+import swaggerUi from 'swagger-ui-express';
+import swaggerJsdoc from 'swagger-jsdoc';
 // --- ИМПОРТИРУЕМ ВСЕ ДЛЯ МЕТРИК ---
 import { register, metricsMiddleware } from './services/metrics';
 
@@ -10,6 +12,23 @@ const app = express();
 const PORT = process.env.PORT || 8080;
 
 app.use(express.json());
+
+const swaggerOptions = {
+  swaggerDefinition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'Telegram Bot Analytics API',
+      version: '1.0.0',
+      description: 'API для сбора и анализа логов Telegram-ботов. Эта документация доступна по требованию ДЗ.',
+    },
+    servers: [{ url: `http://51.250.78.138:8080` }], 
+  },
+  // Путь к файлам с JSDoc комментариями
+  apis: ['./src/routes/*.ts'], 
+};
+
+const swaggerDocs = swaggerJsdoc(swaggerOptions);
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // --- ИСПОЛЬЗУЕМ MIDDLEWARE ДЛЯ ВСЕХ ЗАПРОСОВ ---
 // Важно: он должен быть до объявления роутов
