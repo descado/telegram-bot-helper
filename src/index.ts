@@ -24,7 +24,7 @@ const swaggerOptions = {
     servers: [{ url: `http://51.250.78.138:8080` }], 
   },
   // Путь к файлам с JSDoc комментариями
-  apis: ['./src/routes/*.ts'], 
+  apis: ['./src/routers/*.ts'],
 };
 
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
